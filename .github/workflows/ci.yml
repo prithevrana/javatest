@@ -32,6 +32,8 @@ jobs:
 
       - name: Build with Maven
         run: mvn clean install
+      - name: List WAR files
+        run: ls -l target/*.war
 
       - name: Run tests
         run: mvn test
