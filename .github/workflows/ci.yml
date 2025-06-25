@@ -48,7 +48,6 @@ jobs:
           GLASSFISH_ADMIN_USERNAME: ${{ secrets.GLASSFISH_ADMIN_USERNAME }}
           GLASSFISH_HOST: ${{ secrets.GLASSFISH_HOST }}
         run: |
-          /opt/glassfish4/bin/asadmin --host ${{ secrets.GLASSFISH_HOST }} \
-            --port 4848 --user ${{ secrets.GLASSFISH_ADMIN_USERNAME }} \
-            --passwordfile ./glassfish-password.txt \
-            deploy --force target/*.war
+          /opt/glassfish4/bin/asadmin --host ${{ secrets.GLASSFISH_HOST }} --port 4848 --user ${{ secrets.GLASSFISH_ADMIN_USERNAME }} --passwordfile ./glassfish-password.txt deploy --force target/*.war
+
+        
