@@ -51,6 +51,7 @@ jobs:
           GLASSFISH_PORT: ${{ secrets.GLASSFISH_PORT }}
         run: |
           echo "AS_ADMIN_PASSWORD=${GLASSFISH_ADMIN_PASSWORD}" > glassfish-password.txt
+          chmod 600 glassfish-password.txt
           /opt/glassfish4/bin/asadmin --host $GLASSFISH_HOST \
             --port $GLASSFISH_PORT \
             --user $GLASSFISH_ADMIN_USERNAME \
