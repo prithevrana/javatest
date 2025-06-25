@@ -36,21 +36,28 @@ jobs:
       - name: Run tests
         run: mvn test
 
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v4
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
       - name: Download GlassFish
         run: |
           wget http://download.oracle.com/glassfish/4.1/release/glassfish-4.1.zip
           unzip glassfish-4.1.zip -d /opt
-          export PATH=$PATH:/opt/glassfish4/bin
+          chmod +x /opt/glassfish4/bin/asadmin
 
-      - name: Deployment Process
+      - name: Deploy WAR to GlassFish
         env:
           GLASSFISH_ADMIN_PASSWORD: ${{ secrets.GLASSFISH_ADMIN_PASSWORD }}
           GLASSFISH_ADMIN_USERNAME: ${{ secrets.GLASSFISH_ADMIN_USERNAME }}
           GLASSFISH_HOST: ${{ secrets.GLASSFISH_HOST }}
-    
-          run: 
-            /opt/glassfish4/bin/asadmin --host ${{ secrets.GLASSFISH_HOST }} \
-            --port  ${{ secrets.GLASSFISH_PORT }} --user admin --passwordfile ./glassfish-password.txt \
+          GLASSFISH_PORT: ${{ secrets.GLASSFISH_PORT }}
+        run: |
+          echo "AS_ADMIN_PASSWORD=${GLASSFISH_ADMIN_PASSWORD}" > glassfish-password.txt
+          /opt/glassfish4/bin/asadmin --host $GLASSFISH_HOST \
+            --port $GLASSFISH_PORT \
+            --user $GLASSFISH_ADMIN_USERNAME \
+            --passwordfile ./glassfish-password.txt \
             deploy --force target/*.war
-
-        
