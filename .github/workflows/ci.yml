@@ -44,6 +44,7 @@ jobs:
           scp -o StrictHostKeyChecking=no target/*.war glassfish-password.txt ${{ secrets.SSH_USER }}@${{ secrets.GLASSFISH_HOST }}:/tmp/
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-passphrase: ${{ secrets.SSH_KEY_PASSPHRASE }}
 
       - name: Remote Deploy to GlassFish
         run: |
