@@ -39,7 +39,7 @@ jobs:
       - name: Download GlassFish
         run: |
           wget http://download.oracle.com/glassfish/4.1/release/glassfish-4.1.zip
-          unzip glassfish-4.1.1.zip -d /opt
+          unzip glassfish-4.1.zip -d /opt
           export PATH=$PATH:/opt/glassfish4/bin
 
       - name: Deployment Process
