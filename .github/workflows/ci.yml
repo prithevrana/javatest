@@ -1,3 +1,6 @@
+name: Java CI with SonarQube and GlassFish Deploy
+
+on:
   push:
     branches:
       - main
@@ -34,23 +37,24 @@ jobs:
         run: mvn test
 
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v4  # Use latest stable version
+        uses: SonarSource/sonarqube-scan-action@v4
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
       - name: Download GlassFish
         run: |
           wget https://download.eclipse.org/ee4j/glassfish/glassfish-4.1.2.zip
           unzip glassfish-4.1.2.zip -d /opt
           export PATH=$PATH:/opt/glassfish4/bin
 
-      
-      - name: Deploymnet Process
+      - name: Deployment Process
         env:
           GLASSFISH_ADMIN_PASSWORD: ${{ secrets.GLASSFISH_ADMIN_PASSWORD }}
           GLASSFISH_ADMIN_USERNAME: ${{ secrets.GLASSFISH_ADMIN_USERNAME }}
           GLASSFISH_HOST: ${{ secrets.GLASSFISH_HOST }}
-        run:
+        run: |
           /opt/glassfish4/bin/asadmin --host ${{ secrets.GLASSFISH_HOST }} \
-            --port 4848 --user admin --passwordfile ./glassfish-password.txt \
+            --port 4848 --user ${{ secrets.GLASSFISH_ADMIN_USERNAME }} \
+            --passwordfile ./glassfish-password.txt \
             deploy --force target/*.war
