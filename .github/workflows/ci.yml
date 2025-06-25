@@ -36,12 +36,6 @@ jobs:
       - name: Run tests
         run: mvn test
 
-      - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v4
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-
       - name: Download GlassFish
         run: |
           wget https://download.eclipse.org/ee4j/glassfish/glassfish-4.1.2.zip
