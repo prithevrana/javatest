@@ -36,24 +36,20 @@ jobs:
       - name: Run tests
         run: mvn test
 
+      - name: Create GlassFish password file
+        run: echo "AS_ADMIN_PASSWORD=${{ secrets.GLASSFISH_ADMIN_PASSWORD }}" > glassfish-password.txt
 
-      - name: Download GlassFish
+      - name: Copy WAR and password file to remote server
         run: |
-          wget http://download.oracle.com/glassfish/4.1/release/glassfish-4.1.zip
-          unzip glassfish-4.1.zip -d /opt
-          chmod +x /opt/glassfish4/bin/asadmin
-
-      - name: Deploy WAR to GlassFish
+          scp -o StrictHostKeyChecking=no target/*.war glassfish-password.txt ${{ secrets.SSH_USER }}@${{ secrets.GLASSFISH_HOST }}:/tmp/
         env:
-          GLASSFISH_ADMIN_PASSWORD: ${{ secrets.GLASSFISH_ADMIN_PASSWORD }}
-          GLASSFISH_ADMIN_USERNAME: ${{ secrets.GLASSFISH_ADMIN_USERNAME }}
-          GLASSFISH_HOST: ${{ secrets.GLASSFISH_HOST }}
-          GLASSFISH_PORT: ${{ secrets.GLASSFISH_PORT }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Remote Deploy to GlassFish
         run: |
-          echo "AS_ADMIN_PASSWORD=${GLASSFISH_ADMIN_PASSWORD}" > glassfish-password.txt
-          chmod 600 glassfish-password.txt
-          /opt/glassfish4/bin/asadmin --host $GLASSFISH_HOST \
-            --port $GLASSFISH_PORT \
-            --user $GLASSFISH_ADMIN_USERNAME \
-            --passwordfile ./glassfish-password.txt \
-            deploy --force target/*.war
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.GLASSFISH_HOST }} << 'EOF'
+            /opt/glassfish4/bin/asadmin --host localhost --port 4848 \
+              --user ${{ secrets.GLASSFISH_ADMIN_USERNAME }} \
+              --passwordfile /tmp/glassfish-password.txt \
+              deploy --force /tmp/*.war
+          EOF
