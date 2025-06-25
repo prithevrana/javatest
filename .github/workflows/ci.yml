@@ -48,7 +48,9 @@ jobs:
           GLASSFISH_ADMIN_USERNAME: ${{ secrets.GLASSFISH_ADMIN_USERNAME }}
           GLASSFISH_HOST: ${{ secrets.GLASSFISH_HOST }}
     
-          run: |
-            ls
+          run: 
+            /opt/glassfish4/bin/asadmin --host ${{ secrets.GLASSFISH_HOST }} \
+            --port  ${{ secrets.GLASSFISH_PORT }} --user admin --passwordfile ./glassfish-password.txt \
+            deploy --force target/*.war
 
         
