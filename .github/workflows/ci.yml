@@ -57,7 +57,7 @@ jobs:
 
       - name: Remote Deploy to GlassFish
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.GLASSFISH_HOST }} << 'EOF'
+          scp -i id_rsa -o StrictHostKeyChecking=no target/*.war glassfish-password.txt ${{ secrets.SSH_USER }}@${{ secrets.GLASSFISH_HOST }}:/tmp/ << 'EOF'
             /opt/glassfish4/bin/asadmin --host localhost --port 4848 \
               --user ${{ secrets.GLASSFISH_ADMIN_USERNAME }} \
               --passwordfile /tmp/glassfish-password.txt \
