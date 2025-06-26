@@ -36,7 +36,7 @@ jobs:
         run: pwd
       - name: List WAR files
         run: ls -l 
-      - name: List WAR files
+      - name: target folder check
         run: cd target
       - name: List WAR files
         run: ls -l 
