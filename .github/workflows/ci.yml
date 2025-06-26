@@ -39,7 +39,7 @@ jobs:
       - name: target folder check
         run: cd target
       - name: List WAR files
-        run: ls -l 
+        run: ls -l target/*.war
 
       - name: Run tests
         run: mvn test
