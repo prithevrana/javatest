@@ -50,14 +50,14 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
           chmod 600 id_rsa
           export SSH_AUTH_SOCK=""
-          scp -i id_rsa -o StrictHostKeyChecking=no target/*.war glassfish-password.txt ${{ secrets.SSH_USER }}@${{ secrets.GLASSFISH_HOST }}:/tmp/
+          scp -i id_rsa -o StrictHostKeyChecking=no target/*.war glassfish-password.txt root@216.48.180.153:/tmp/
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           ssh-passphrase: ${{ secrets.SSH_KEY_PASSPHRASE }}
 
       - name: Remote Deploy to GlassFish
         run: |
-          scp -i id_rsa -o StrictHostKeyChecking=no target/*.war glassfish-password.txt ${{ secrets.SSH_USER }}@${{ secrets.GLASSFISH_HOST }}:/tmp/
+          scp -i id_rsa -o StrictHostKeyChecking=no target/*.war glassfish-password.txt root@216.48.180.153:/tmp/
             /opt/glassfish4/bin/asadmin --host localhost --port 4848 \
               --user ${{ secrets.GLASSFISH_ADMIN_USERNAME }} \
               --passwordfile /tmp/glassfish-password.txt \
