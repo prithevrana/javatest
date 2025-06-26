@@ -32,6 +32,8 @@ jobs:
 
       - name: Build with Maven
         run: mvn clean install
+      - name: war checking
+        run: ls target/*.war
       - name: Path
         run: pwd
       - name: List WAR files
