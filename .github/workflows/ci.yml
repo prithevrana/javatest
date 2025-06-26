@@ -35,7 +35,7 @@ jobs:
       - name: Path
         run: pwd
       - name: List WAR files
-        run: ls -l target/*.war
+        run: ls -l 
 
       - name: Run tests
         run: mvn test
