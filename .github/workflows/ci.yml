@@ -47,6 +47,9 @@ jobs:
 
       - name: Copy WAR and password file to remote server
         run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
+          chmod 600 id_rsa
+          export SSH_AUTH_SOCK=""
           scp -o StrictHostKeyChecking=no target/*.war glassfish-password.txt ${{ secrets.SSH_USER }}@${{ secrets.GLASSFISH_HOST }}:/tmp/
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
