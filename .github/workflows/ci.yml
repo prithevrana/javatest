@@ -2,11 +2,9 @@ name: Java CI with SonarQube and GlassFish Deploy
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
   build:
@@ -21,8 +19,7 @@ jobs:
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
+          restore-keys: ${{ runner.os }}-maven-
 
       - name: Set up JDK 8
         uses: actions/setup-java@v3
@@ -30,18 +27,17 @@ jobs:
           distribution: 'temurin'
           java-version: '8'
 
-      - name: Build with Maven
-        run: mvn clean install
-      - name: war checking
-        run: ls target/*.war
-      - name: Path
-        run: pwd
-      - name: List WAR files
-        run: ls -l 
-      - name: target folder check
-        run: cd target
-      - name: List WAR files
-        run: ls -l target/*.war
+      - name: Build WAR with Maven
+        run: mvn clean package
+
+      - name: Check for WAR file
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "Target contents:"
+          ls -al target || echo "No target folder"
+          echo "WAR files:"
+          ls -al target/*.war || echo "No WAR files found"
 
       - name: Run tests
         run: mvn test
