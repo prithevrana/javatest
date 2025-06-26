@@ -1,51 +1,62 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" 
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"         
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
-                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+name: Java CI with SonarQube and GlassFish Deploy
 
-    <modelVersion>4.0.0</modelVersion>
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
-    <groupId>com.example</groupId>
-    <artifactId>demo</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <packaging>jar</packaging>
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-         
-    <name>demo</name>
-    <description>Demo Spring Boot Project</description>
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
 
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.6.2</version>
-        <relativePath/> <!-- lookup parent from repository -->
-    </parent>
+      - name: Set up JDK 8
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '8'
 
-    <properties>
-        <java.version>1.8</java.version>
-    </properties>
+      - name: Build WAR with Maven
+        run: mvn clean package
 
-    <dependencies>
-        <!-- Spring Boot Starter Web -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-    </dependencies>
+      - name: Check for WAR file
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "Target contents:"
+          ls -al target || echo "No target folder"
+          echo "WAR files:"
+          ls -al target/*.war || echo "No WAR files found"
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>2.6.2</version>
-                <configuration>
-                    <!-- Fully qualified main class name -->
-                    <mainClass>com.example.demo.DemoApplication</mainClass>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+      - name: Run tests
+        run: mvn test
 
-</project>
+      - name: Create GlassFish password file
+        run: echo "AS_ADMIN_PASSWORD=${{ secrets.GLASSFISH_ADMIN_PASSWORD }}" > glassfish-password.txt
+
+      - name: Copy WAR and password file to remote server
+        run: |
+          scp -o StrictHostKeyChecking=no target/*.war glassfish-password.txt ${{ secrets.SSH_USER }}@${{ secrets.GLASSFISH_HOST }}:/tmp/
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-passphrase: ${{ secrets.SSH_KEY_PASSPHRASE }}
+
+      - name: Remote Deploy to GlassFish
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.GLASSFISH_HOST }} << 'EOF'
+            /opt/glassfish4/bin/asadmin --host localhost --port 4848 \
+              --user ${{ secrets.GLASSFISH_ADMIN_USERNAME }} \
+              --passwordfile /tmp/glassfish-password.txt \
+              deploy --force /tmp/*.war
+          EOF
